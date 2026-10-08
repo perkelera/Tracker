@@ -5,7 +5,6 @@
 //  Created by Anton Rachkov on 07.10.2026.
 //
 
-import Foundation
 import UIKit
 
 final class CategoryHeaderView: UICollectionReusableView {

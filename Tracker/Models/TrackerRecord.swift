@@ -5,7 +5,6 @@
 //  Created by Anton Rachkov on 05.10.2026.
 //
 
-import Foundation
 import  UIKit
 
 struct TrackerRecord: Hashable {

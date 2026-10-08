@@ -3,9 +3,7 @@
 //  Tracker
 //
 //  Created by Anton Rachkov on 29.09.2026.
-//
 
-import Foundation
 import UIKit
 
 final class StatisticViewController: UIViewController {

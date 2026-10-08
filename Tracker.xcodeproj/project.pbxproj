@@ -6,6 +6,10 @@
 	objectVersion = 77;
 	objects = {
 
+/* Begin PBXBuildFile section */
+		3AE6EE9430777CAD0098224C /* .gitignore in Resources */ = {isa = PBXBuildFile; fileRef = 3AE6EE9330777CAD0098224C /* .gitignore */; };
+/* End PBXBuildFile section */
+
 /* Begin PBXContainerItemProxy section */
 		3A34230A306AB13600A72767 /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
@@ -27,6 +31,7 @@
 		3AE6EE143076B8DB0098224C /* Tracker.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Tracker.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		3AE6EE153076B8DB0098224C /* TrackerTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = TrackerTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		3AE6EE163076B8DB0098224C /* TrackerUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = TrackerUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
+		3AE6EE9330777CAD0098224C /* .gitignore */ = {isa = PBXFileReference; lastKnownFileType = text; path = .gitignore; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFileSystemSynchronizedBuildFileExceptionSet section */
@@ -94,6 +99,7 @@
 				3AE6EE143076B8DB0098224C /* Tracker.app */,
 				3AE6EE153076B8DB0098224C /* TrackerTests.xctest */,
 				3AE6EE163076B8DB0098224C /* TrackerUITests.xctest */,
+				3AE6EE9330777CAD0098224C /* .gitignore */,
 			);
 			sourceTree = "<group>";
 		};
@@ -217,6 +223,7 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				3AE6EE9430777CAD0098224C /* .gitignore in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
