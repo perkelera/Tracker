@@ -25,9 +25,12 @@ struct GeometricParams {
 
 final class TrackersViewController: UIViewController, UICollectionViewDataSource, UICollectionViewDelegateFlowLayout, UISearchResultsUpdating, NewHabitViewControllerDelegate {
     
+    private let trackerCategoryStore = TrackerCategoryStore()
+    private let trackerRecordStore = TrackerRecordStore()
+    
     var categories: [TrackerCategory] = []
     var visibleCategories: [TrackerCategory] = []
-    var completedTrackers: [TrackerRecord] = []
+    var completedTrackers: Set<TrackerRecord> = []
     var currentDate: Date = Date()
     
     private let params = GeometricParams(cellCount: 2, leftInset: 16, rightInset: 16, cellSpacing: 9)
@@ -57,7 +60,20 @@ final class TrackersViewController: UIViewController, UICollectionViewDataSource
         addSearchController()
         setupPlaceHolder()
         
+        trackerCategoryStore.delegate = self
+        
         currentDate = Calendar.current.startOfDay(for: Date())
+        loadDataFromCoreData()
+    }
+    
+    override func viewWillAppear(_ animated: Bool) {
+        super.viewWillAppear(animated)
+        loadDataFromCoreData()
+    }
+    
+    private func loadDataFromCoreData() {
+        categories = trackerCategoryStore.categories
+        completedTrackers = trackerRecordStore.records
         filterTrackersByDateAndSearch()
     }
     
@@ -153,7 +169,8 @@ final class TrackersViewController: UIViewController, UICollectionViewDataSource
     }
     
     private func filterTrackersByDateAndSearch() {
-        let calendar = Calendar.current
+        var calendar = Calendar(identifier: .gregorian)
+        calendar.locale = Locale(identifier: "en_US_POSIX")
         let dayNumber = calendar.component(.weekday, from: currentDate)
         guard let currentDay = WeekDay(rawValue: dayNumber) else { return }
         
@@ -161,7 +178,12 @@ final class TrackersViewController: UIViewController, UICollectionViewDataSource
         
         visibleCategories = categories.compactMap { category in
             let filteredTrackers = category.trackers.filter { tracker in
-                let matchesSchedule = tracker.schedule?.contains(currentDay) ?? true
+                let matchesSchedule: Bool
+                if let schedule = tracker.schedule, !schedule.isEmpty {
+                    matchesSchedule = schedule.contains(currentDay)
+                } else {
+                    matchesSchedule = true
+                }
                 let matchesSearch = searchText.isEmpty || tracker.name.lowercased().contains(searchText)
                 return matchesSchedule && matchesSearch
             }
@@ -178,18 +200,7 @@ final class TrackersViewController: UIViewController, UICollectionViewDataSource
     }
     
     func didCreateTracker(_ tracker: Tracker) {
-        let defaultCategoryTitle = "Важное"
-        
-        if categories.isEmpty {
-            categories = [TrackerCategory(title: defaultCategoryTitle, trackers: [tracker])]
-        } else {
-            let firstCategory = categories[0]
-            var updatedTrackers = firstCategory.trackers
-            updatedTrackers.append(tracker)
-            categories = [TrackerCategory(title: firstCategory.title, trackers: updatedTrackers)]
-        }
-        
-        filterTrackersByDateAndSearch()
+        loadDataFromCoreData()
     }
     
     func numberOfSections(in collectionView: UICollectionView) -> Int {
@@ -236,6 +247,7 @@ final class TrackersViewController: UIViewController, UICollectionViewDataSource
         
         cell.cardView.backgroundColor = tracker.color
         cell.titleLabel.text = tracker.name
+        cell.emojiLabel.text = tracker.emoji
         cell.doneButton.backgroundColor = tracker.color
         cell.daysLabel.text = "\(totalDoneCount) дн."
         
@@ -247,13 +259,14 @@ final class TrackersViewController: UIViewController, UICollectionViewDataSource
         cell.doneButtonAction = { [weak self] in
             guard let self = self, !isFutureDate else { return }
             
+            let record = TrackerRecord(trackerId: tracker.id, date: self.currentDate)
+            
             if isDone {
-                self.completedTrackers.removeAll {
-                    $0.trackerId == tracker.id && Calendar.current.isDate($0.date, inSameDayAs: self.currentDate)
-                }
+                try? self.trackerRecordStore.removeRecord(record)
+                self.completedTrackers.remove(record)
             } else {
-                let newRecord = TrackerRecord(trackerId: tracker.id, date: self.currentDate)
-                self.completedTrackers.append(newRecord)
+                try? self.trackerRecordStore.addNewRecord(record)
+                self.completedTrackers.insert(record)
             }
             self.collectionView.reloadItems(at: [indexPath])
         }
@@ -273,5 +286,11 @@ final class TrackersViewController: UIViewController, UICollectionViewDataSource
     
     func collectionView(_ collectionView: UICollectionView, layout collectionViewLayout: UICollectionViewLayout, minimumInteritemSpacingForSectionAt section: Int) -> CGFloat {
         return params.cellSpacing
+    }
+}
+
+extension TrackersViewController: TrackerCategoryStoreDelegate {
+    func store(_ store: TrackerCategoryStore, didUpdate update: TrackerCategoryStoreUpdate) {
+        loadDataFromCoreData()
     }
 }

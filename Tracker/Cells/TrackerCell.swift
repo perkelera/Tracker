@@ -11,8 +11,9 @@ final class TrackerCell: UICollectionViewCell {
     static let identifier = "TrackerCell"
     
     var doneButtonAction: (() -> Void)?
-    
     let cardView = UIView()
+    let emojiBackgroundView = UIView()
+    let emojiLabel = UILabel()
     let titleLabel = UILabel()
     let daysLabel = UILabel()
     let doneButton = UIButton(type: .system)
@@ -23,6 +24,19 @@ final class TrackerCell: UICollectionViewCell {
         cardView.layer.cornerRadius = 16
         cardView.translatesAutoresizingMaskIntoConstraints = false
         contentView.addSubview(cardView)
+        emojiLabel.font = .systemFont(ofSize: 24)
+        emojiLabel.translatesAutoresizingMaskIntoConstraints = false
+        cardView.addSubview(emojiLabel)
+        emojiBackgroundView.backgroundColor = UIColor.white.withAlphaComponent(0.3)
+        emojiBackgroundView.layer.cornerRadius = 12
+        emojiBackgroundView.layer.masksToBounds = true
+        emojiBackgroundView.translatesAutoresizingMaskIntoConstraints = false
+        cardView.addSubview(emojiBackgroundView)
+        
+        emojiLabel.font = .systemFont(ofSize: 14)
+        emojiLabel.textAlignment = .center
+        emojiLabel.translatesAutoresizingMaskIntoConstraints = false
+        emojiBackgroundView.addSubview(emojiLabel)
         
         titleLabel.textColor = .white
         titleLabel.font = .systemFont(ofSize: 12, weight: .medium)
@@ -45,6 +59,16 @@ final class TrackerCell: UICollectionViewCell {
             cardView.leadingAnchor.constraint(equalTo: contentView.leadingAnchor),
             cardView.trailingAnchor.constraint(equalTo: contentView.trailingAnchor),
             cardView.heightAnchor.constraint(equalToConstant: 90),
+            
+            emojiBackgroundView.topAnchor.constraint(equalTo: cardView.topAnchor, constant: 12),
+            emojiBackgroundView.leadingAnchor.constraint(equalTo: cardView.leadingAnchor, constant: 12),
+            emojiBackgroundView.widthAnchor.constraint(equalToConstant: 24),
+            emojiBackgroundView.heightAnchor.constraint(equalToConstant: 24),
+            
+            emojiLabel.centerXAnchor.constraint(equalTo: emojiBackgroundView.centerXAnchor),
+            emojiLabel.centerYAnchor.constraint(equalTo: emojiBackgroundView.centerYAnchor),
+            emojiLabel.topAnchor.constraint(equalTo: cardView.topAnchor, constant: 12),
+            emojiLabel.leadingAnchor.constraint(equalTo: cardView.leadingAnchor, constant: 12),
             
             titleLabel.leadingAnchor.constraint(equalTo: cardView.leadingAnchor, constant: 12),
             titleLabel.trailingAnchor.constraint(equalTo: cardView.trailingAnchor, constant: -12),
