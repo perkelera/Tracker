@@ -20,6 +20,7 @@ final class NewHabitViewController: UIViewController, UITableViewDataSource, UIT
     weak var delegate: NewHabitViewControllerDelegate?
     private let trackerCategoryStore = TrackerCategoryStore()
     
+    var selectedCategoryTitle: String = "Важное"
     var selectedSchedule: [WeekDay] = []
     var selectedEmoji: String = "🪴"
     var selectedColor: UIColor = .systemGreen
@@ -156,7 +157,7 @@ final class NewHabitViewController: UIViewController, UITableViewDataSource, UIT
         )
         
         do {
-            try trackerCategoryStore.addTracker(tracker, toCategoryWithTitle: "Важное")
+            try trackerCategoryStore.addTracker(tracker, toCategoryWithTitle: selectedCategoryTitle)
             delegate?.didCreateTracker(tracker)
             dismiss(animated: true)
         } catch {
@@ -176,7 +177,7 @@ final class NewHabitViewController: UIViewController, UITableViewDataSource, UIT
         
         if indexPath.row == 0 {
             cell.textLabel?.text = "Категория"
-            cell.detailTextLabel?.text = "Важное"
+            cell.detailTextLabel?.text = selectedCategoryTitle
         } else {
             cell.textLabel?.text = "Расписание"
             if selectedSchedule.isEmpty {
@@ -189,7 +190,15 @@ final class NewHabitViewController: UIViewController, UITableViewDataSource, UIT
     }
     
     func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
-        if indexPath.row == 1 {
+        if indexPath.row == 0 {
+            let viewModel = CategoryViewModel(
+                categoryStore: trackerCategoryStore,
+                selectedCategoryTitle: selectedCategoryTitle
+            )
+            let categoriesVC = CategoriesViewController(viewModel: viewModel)
+            categoriesVC.delegate = self
+            navigationController?.pushViewController(categoriesVC, animated: true)
+        } else if indexPath.row == 1 {
             let scheduleVC = ScheduleViewController()
             scheduleVC.delegate = self
             navigationController?.pushViewController(scheduleVC, animated: true)
@@ -271,6 +280,13 @@ extension NewHabitViewController: ScheduleViewControllerDelegate {
     func didSelectSchedule(_ schedule: [WeekDay]) {
         selectedSchedule = schedule
         tableView.reloadData()
+    }
+}
+
+extension NewHabitViewController: CategoriesViewControllerDelegate {
+    func didSelectCategory(_ category: TrackerCategory) {
+        self.selectedCategoryTitle = category.title
+        self.tableView.reloadData()
     }
 }
 
