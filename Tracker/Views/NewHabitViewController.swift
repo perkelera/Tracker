@@ -15,21 +15,45 @@ protocol ScheduleViewControllerDelegate: AnyObject {
     func didSelectSchedule(_ schedule: [WeekDay])
 }
 
-final class NewHabitViewController: UIViewController, UITableViewDataSource, UITableViewDelegate {
+final class NewHabitViewController: UIViewController, UITableViewDataSource, UITableViewDelegate, UICollectionViewDataSource, UICollectionViewDelegateFlowLayout {
     
     weak var delegate: NewHabitViewControllerDelegate?
+    private let trackerCategoryStore = TrackerCategoryStore()
+    
     var selectedSchedule: [WeekDay] = []
+    var selectedEmoji: String = "🪴"
+    var selectedColor: UIColor = .systemGreen
+    
+    let emojis: [String] = [
+        "🙂", "😻", "🌺", "🐶", "❤️", "😱",
+        "😇", "😡", "🥶", "🤔", "🙌", "🍔",
+        "🥦", "🏓", "🥇", "🎸", "🏝️", "😪"
+    ]
+    
+    let colors: [UIColor] = [
+        .systemRed, .systemOrange, .systemBlue, .systemPurple, .systemGreen, .systemPink,
+        .systemTeal, .systemYellow, .systemIndigo, .systemMint, .systemBrown, .systemCyan,
+        .systemGray, .systemGray2, .systemGray3, .systemGray4, .systemGray5, .black
+    ]
     
     let titleLabel = UILabel()
     let nameTextField = UITextField()
     let tableView = UITableView()
+    
+    let collectionView: UICollectionView = {
+        let layout = UICollectionViewFlowLayout()
+        layout.scrollDirection = .vertical
+        let cv = UICollectionView(frame: .zero, collectionViewLayout: layout)
+        cv.backgroundColor = .clear
+        return cv
+    }()
+    
     let cancelButton = UIButton(type: .system)
     let createButton = UIButton(type: .system)
     
     override func viewDidLoad() {
         super.viewDidLoad()
         view.backgroundColor = .systemBackground
-        
         setupViews()
     }
     
@@ -54,6 +78,18 @@ final class NewHabitViewController: UIViewController, UITableViewDataSource, UIT
         tableView.rowHeight = 75
         tableView.translatesAutoresizingMaskIntoConstraints = false
         view.addSubview(tableView)
+        
+        collectionView.dataSource = self
+        collectionView.delegate = self
+        collectionView.register(EmojiCell.self, forCellWithReuseIdentifier: EmojiCell.reuseIdentifier)
+        collectionView.register(ColorCell.self, forCellWithReuseIdentifier: ColorCell.reuseIdentifier)
+        collectionView.register(
+            SectionHeaderView.self,
+            forSupplementaryViewOfKind: UICollectionView.elementKindSectionHeader,
+            withReuseIdentifier: SectionHeaderView.reuseIdentifier
+        )
+        collectionView.translatesAutoresizingMaskIntoConstraints = false
+        view.addSubview(collectionView)
         
         cancelButton.setTitle("Отменить", for: .normal)
         cancelButton.setTitleColor(.systemRed, for: .normal)
@@ -86,6 +122,11 @@ final class NewHabitViewController: UIViewController, UITableViewDataSource, UIT
             tableView.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -16),
             tableView.heightAnchor.constraint(equalToConstant: 150),
             
+            collectionView.topAnchor.constraint(equalTo: tableView.bottomAnchor, constant: 16),
+            collectionView.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: 16),
+            collectionView.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -16),
+            collectionView.bottomAnchor.constraint(equalTo: cancelButton.topAnchor, constant: -16),
+            
             cancelButton.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: 20),
             cancelButton.bottomAnchor.constraint(equalTo: view.safeAreaLayoutGuide.bottomAnchor, constant: -10),
             cancelButton.heightAnchor.constraint(equalToConstant: 60),
@@ -109,13 +150,18 @@ final class NewHabitViewController: UIViewController, UITableViewDataSource, UIT
         let tracker = Tracker(
             id: UUID(),
             name: name,
-            color: .systemGreen,
-            emoji: "🪴",
+            color: selectedColor,
+            emoji: selectedEmoji,
             schedule: selectedSchedule
         )
         
-        delegate?.didCreateTracker(tracker)
-        dismiss(animated: true)
+        do {
+            try trackerCategoryStore.addTracker(tracker, toCategoryWithTitle: "Важное")
+            delegate?.didCreateTracker(tracker)
+            dismiss(animated: true)
+        } catch {
+            print("Failed to save tracker: \(error)")
+        }
     }
     
     func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
@@ -149,12 +195,108 @@ final class NewHabitViewController: UIViewController, UITableViewDataSource, UIT
             navigationController?.pushViewController(scheduleVC, animated: true)
         }
     }
+    
+    func numberOfSections(in collectionView: UICollectionView) -> Int {
+        return 2
+    }
+    
+    func collectionView(_ collectionView: UICollectionView, numberOfItemsInSection section: Int) -> Int {
+        return section == 0 ? emojis.count : colors.count
+    }
+    
+    func collectionView(_ collectionView: UICollectionView, cellForItemAt indexPath: IndexPath) -> UICollectionViewCell {
+        if indexPath.section == 0 {
+            guard let cell = collectionView.dequeueReusableCell(
+                withReuseIdentifier: EmojiCell.reuseIdentifier,
+                for: indexPath
+            ) as? EmojiCell else {
+                return UICollectionViewCell()
+            }
+            let emoji = emojis[indexPath.item]
+            cell.configure(with: emoji, isSelected: emoji == selectedEmoji)
+            return cell
+        } else {
+            guard let cell = collectionView.dequeueReusableCell(
+                withReuseIdentifier: ColorCell.reuseIdentifier,
+                for: indexPath
+            ) as? ColorCell else {
+                return UICollectionViewCell()
+            }
+            let color = colors[indexPath.item]
+            cell.configure(with: color, isSelected: color == selectedColor)
+            return cell
+        }
+    }
+    
+    func collectionView(_ collectionView: UICollectionView, viewForSupplementaryElementOfKind kind: String, at indexPath: IndexPath) -> UICollectionReusableView {
+        guard let header = collectionView.dequeueReusableSupplementaryView(
+            ofKind: kind,
+            withReuseIdentifier: SectionHeaderView.reuseIdentifier,
+            for: indexPath
+        ) as? SectionHeaderView else {
+            return UICollectionReusableView()
+        }
+        header.titleLabel.text = indexPath.section == 0 ? "Emoji" : "Цвет"
+        return header
+    }
+    
+    func collectionView(_ collectionView: UICollectionView, layout collectionViewLayout: UICollectionViewLayout, sizeForItemAt indexPath: IndexPath) -> CGSize {
+        let width = floor((collectionView.bounds.width - 25) / 6)
+        return CGSize(width: width, height: 52)
+    }
+    
+    func collectionView(_ collectionView: UICollectionView, layout collectionViewLayout: UICollectionViewLayout, minimumInteritemSpacingForSectionAt section: Int) -> CGFloat {
+        return 5
+    }
+    
+    func collectionView(_ collectionView: UICollectionView, layout collectionViewLayout: UICollectionViewLayout, minimumLineSpacingForSectionAt section: Int) -> CGFloat {
+        return 0
+    }
+    
+    func collectionView(_ collectionView: UICollectionView, layout collectionViewLayout: UICollectionViewLayout, referenceSizeForHeaderInSection section: Int) -> CGSize {
+        return CGSize(width: collectionView.bounds.width, height: 46)
+    }
+    
+    func collectionView(_ collectionView: UICollectionView, didSelectItemAt indexPath: IndexPath) {
+        if indexPath.section == 0 {
+            selectedEmoji = emojis[indexPath.item]
+        } else {
+            selectedColor = colors[indexPath.item]
+        }
+        collectionView.reloadSections(IndexSet(integer: indexPath.section))
+    }
 }
 
 extension NewHabitViewController: ScheduleViewControllerDelegate {
     func didSelectSchedule(_ schedule: [WeekDay]) {
         selectedSchedule = schedule
         tableView.reloadData()
+    }
+}
+
+final class SectionHeaderView: UICollectionReusableView {
+    static let reuseIdentifier = "SectionHeaderView"
+    
+    let titleLabel: UILabel = {
+        let label = UILabel()
+        label.font = .boldSystemFont(ofSize: 19)
+        label.textColor = .label
+        label.translatesAutoresizingMaskIntoConstraints = false
+        return label
+    }()
+    
+    override init(frame: CGRect) {
+        super.init(frame: frame)
+        addSubview(titleLabel)
+        NSLayoutConstraint.activate([
+            titleLabel.leadingAnchor.constraint(equalTo: leadingAnchor, constant: 10),
+            titleLabel.bottomAnchor.constraint(equalTo: bottomAnchor, constant: -12),
+            titleLabel.topAnchor.constraint(equalTo: topAnchor)
+        ])
+    }
+    
+    required init?(coder: NSCoder) {
+        fatalError("init(coder:) has not been implemented")
     }
 }
 
@@ -178,7 +320,6 @@ final class ScheduleViewController: UIViewController, UITableViewDataSource, UIT
         super.viewDidLoad()
         view.backgroundColor = .systemBackground
         title = "Расписание"
-        
         setupViews()
     }
     
@@ -203,7 +344,7 @@ final class ScheduleViewController: UIViewController, UITableViewDataSource, UIT
             tableView.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor, constant: 16),
             tableView.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: 16),
             tableView.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -16),
-            tableView.heightAnchor.constraint(equalToConstant: 75 * 7),
+            tableView.heightAnchor.constraint(equalToConstant: 525),
             
             doneButton.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: 20),
             doneButton.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -20),
