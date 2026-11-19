@@ -1,0 +1,59 @@
+/* 
+  Localizable.strings
+  Tracker
+
+  Created by Anton Rachkov on 12.11.2026.
+  
+*/
+"trackers.title" = "Trackers";
+"trackers.search.placeholder" = "Search";
+"trackers.empty.title" = "What will we track?";
+"statistics.title" = "Statistics";
+"onboarding.first.title" = "Track only\nwhat you want";
+"onboarding.second.title" = "Even if it's not\nliters of water and yoga";
+"onboarding.button.title" = "That's technology!";
+"newHabit.title" = "New habit";
+"newHabit.name.placeholder" = "Enter tracker name";
+"newHabit.category" = "Category";
+"newHabit.schedule" = "Schedule";
+"newHabit.cancel" = "Cancel";
+"newHabit.create" = "Create";
+"categories.title" = "Category";
+"categories.empty.title" = "Habits and events can be\ncombined in meaning";
+"categories.add.button" = "Add category";
+"newCategory.title" = "New category";
+"newCategory.placeholder" = "Enter category name";
+"newCategory.done" = "Done";
+"newHabit.color" = "Color";
+"newHabit.schedule.selected" = "Selected days: %d";
+"schedule.title" = "Schedule";
+"schedule.done" = "Done";
+"day.monday" = "Monday";
+"day.tuesday" = "Tuesday";
+"day.wednesday" = "Wednesday";
+"day.thursday" = "Thursday";
+"day.friday" = "Friday";
+"day.saturday" = "Saturday";
+"day.sunday" = "Sunday";
+"newHabit.defaultCategory" = "Important";
+"trackers.empty.title" = "What will we track?";
+"trackers.nothingFound.title" = "Nothing found";
+"statistics.empty.title" = "Nothing to analyze yet";
+"statistics.bestPeriod" = "Best period";
+"statistics.idealDays" = "Ideal days";
+"statistics.completed" = "Trackers completed";
+"statistics.average" = "Average value";
+"editHabit.title" = "Edit habit";
+"editHabit.save" = "Save";
+"contextMenu.edit" = "Edit";
+"contextMenu.delete" = "Delete";
+"deleteAlert.message" = "Are you sure you want to delete the tracker?";
+"deleteAlert.cancel" = "Cancel";
+"trackers.pinnedCategory" = "Pinned";
+"contextMenu.pin" = "Pin";
+"contextMenu.unpin" = "Unpin";
+"filters.title" = "Filters";
+"filters.all" = "All trackers";
+"filters.today" = "Trackers for today";
+"filters.completed" = "Completed";
+"filters.uncompleted" = "Uncompleted";

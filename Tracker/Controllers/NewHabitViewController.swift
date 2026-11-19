@@ -8,7 +8,8 @@
 import UIKit
 
 protocol NewHabitViewControllerDelegate: AnyObject {
-    func didCreateTracker(_ tracker: Tracker)
+    func didCreateTracker(_ tracker: Tracker, categoryTitle: String)
+    func didUpdateTracker(_ tracker: Tracker, categoryTitle: String)
 }
 
 protocol ScheduleViewControllerDelegate: AnyObject {
@@ -18,12 +19,17 @@ protocol ScheduleViewControllerDelegate: AnyObject {
 final class NewHabitViewController: UIViewController, UITableViewDataSource, UITableViewDelegate, UICollectionViewDataSource, UICollectionViewDelegateFlowLayout {
     
     weak var delegate: NewHabitViewControllerDelegate?
-    private let trackerCategoryStore = TrackerCategoryStore()
+    private let colors = Colors()
     
-    var selectedCategoryTitle: String = "Важное"
+    var editingTracker: Tracker?
+    var completedDaysCount: Int = 0
+    
+    var selectedCategoryTitle: String = NSLocalizedString("newHabit.defaultCategory", comment: "")
     var selectedSchedule: [WeekDay] = []
     var selectedEmoji: String = "🪴"
     var selectedColor: UIColor = .systemGreen
+    
+    private var isEditingMode: Bool { editingTracker != nil }
     
     let emojis: [String] = [
         "🙂", "😻", "🌺", "🐶", "❤️", "😱",
@@ -31,13 +37,14 @@ final class NewHabitViewController: UIViewController, UITableViewDataSource, UIT
         "🥦", "🏓", "🥇", "🎸", "🏝️", "😪"
     ]
     
-    let colors: [UIColor] = [
+    let trackerColors: [UIColor] = [
         .systemRed, .systemOrange, .systemBlue, .systemPurple, .systemGreen, .systemPink,
         .systemTeal, .systemYellow, .systemIndigo, .systemMint, .systemBrown, .systemCyan,
         .systemGray, .systemGray2, .systemGray3, .systemGray4, .systemGray5, .black
     ]
     
     let titleLabel = UILabel()
+    let daysCountLabel = UILabel()
     let nameTextField = UITextField()
     let tableView = UITableView()
     
@@ -54,18 +61,42 @@ final class NewHabitViewController: UIViewController, UITableViewDataSource, UIT
     
     override func viewDidLoad() {
         super.viewDidLoad()
-        view.backgroundColor = .systemBackground
+        view.backgroundColor = colors.viewBackgroundColor
+        configureInitialData()
         setupViews()
     }
     
+    private func configureInitialData() {
+        guard let tracker = editingTracker else { return }
+        nameTextField.text = tracker.name
+        selectedEmoji = tracker.emoji
+        selectedColor = tracker.color
+        selectedSchedule = tracker.schedule ?? []
+    }
+    
     func setupViews() {
-        titleLabel.text = "Новая привычка"
+        titleLabel.text = isEditingMode
+            ? NSLocalizedString("editHabit.title", comment: "")
+            : NSLocalizedString("newHabit.title", comment: "")
         titleLabel.font = .systemFont(ofSize: 16, weight: .medium)
+        titleLabel.textColor = colors.primaryTextColor
         titleLabel.translatesAutoresizingMaskIntoConstraints = false
         view.addSubview(titleLabel)
         
-        nameTextField.placeholder = "Введите название трекера"
-        nameTextField.backgroundColor = .systemGray6
+        daysCountLabel.text = String.localizedStringWithFormat(
+            NSLocalizedString("daysCount", comment: ""),
+            completedDaysCount
+        )
+        daysCountLabel.font = .systemFont(ofSize: 32, weight: .bold)
+        daysCountLabel.textColor = colors.primaryTextColor
+        daysCountLabel.textAlignment = .center
+        daysCountLabel.isHidden = !isEditingMode
+        daysCountLabel.translatesAutoresizingMaskIntoConstraints = false
+        view.addSubview(daysCountLabel)
+        
+        nameTextField.placeholder = NSLocalizedString("newHabit.name.placeholder", comment: "")
+        nameTextField.backgroundColor = colors.secondaryBackgroundColor
+        nameTextField.textColor = colors.primaryTextColor
         nameTextField.layer.cornerRadius = 16
         nameTextField.leftView = UIView(frame: CGRect(x: 0, y: 0, width: 16, height: 0))
         nameTextField.leftViewMode = .always
@@ -92,7 +123,7 @@ final class NewHabitViewController: UIViewController, UITableViewDataSource, UIT
         collectionView.translatesAutoresizingMaskIntoConstraints = false
         view.addSubview(collectionView)
         
-        cancelButton.setTitle("Отменить", for: .normal)
+        cancelButton.setTitle(NSLocalizedString("newHabit.cancel", comment: ""), for: .normal)
         cancelButton.setTitleColor(.systemRed, for: .normal)
         cancelButton.layer.borderWidth = 1
         cancelButton.layer.borderColor = UIColor.systemRed.cgColor
@@ -101,19 +132,31 @@ final class NewHabitViewController: UIViewController, UITableViewDataSource, UIT
         cancelButton.translatesAutoresizingMaskIntoConstraints = false
         view.addSubview(cancelButton)
         
-        createButton.setTitle("Создать", for: .normal)
-        createButton.setTitleColor(.white, for: .normal)
-        createButton.backgroundColor = .black
+        let actionTitle = isEditingMode
+            ? NSLocalizedString("editHabit.save", comment: "")
+            : NSLocalizedString("newHabit.create", comment: "")
+        createButton.setTitle(actionTitle, for: .normal)
+        createButton.backgroundColor = colors.buttonBackgroundColor
+        createButton.setTitleColor(colors.buttonTextColor, for: .normal)
         createButton.layer.cornerRadius = 16
         createButton.addTarget(self, action: #selector(createTapped), for: .touchUpInside)
         createButton.translatesAutoresizingMaskIntoConstraints = false
         view.addSubview(createButton)
         
+        let textFieldTopAnchor = isEditingMode
+            ? daysCountLabel.bottomAnchor
+            : titleLabel.bottomAnchor
+        let textFieldTopConstant: CGFloat = isEditingMode ? 40 : 30
+        
         NSLayoutConstraint.activate([
             titleLabel.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor, constant: 20),
             titleLabel.centerXAnchor.constraint(equalTo: view.centerXAnchor),
             
-            nameTextField.topAnchor.constraint(equalTo: titleLabel.bottomAnchor, constant: 30),
+            daysCountLabel.topAnchor.constraint(equalTo: titleLabel.bottomAnchor, constant: 38),
+            daysCountLabel.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: 16),
+            daysCountLabel.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -16),
+            
+            nameTextField.topAnchor.constraint(equalTo: textFieldTopAnchor, constant: textFieldTopConstant),
             nameTextField.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: 16),
             nameTextField.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -16),
             nameTextField.heightAnchor.constraint(equalToConstant: 75),
@@ -145,24 +188,22 @@ final class NewHabitViewController: UIViewController, UITableViewDataSource, UIT
     }
     
     @objc func createTapped() {
-        let name = nameTextField.text ?? ""
-        if name.isEmpty { return }
+        guard let name = nameTextField.text, !name.isEmpty else { return }
         
         let tracker = Tracker(
-            id: UUID(),
+            id: editingTracker?.id ?? UUID(),
             name: name,
             color: selectedColor,
             emoji: selectedEmoji,
             schedule: selectedSchedule
         )
         
-        do {
-            try trackerCategoryStore.addTracker(tracker, toCategoryWithTitle: selectedCategoryTitle)
-            delegate?.didCreateTracker(tracker)
-            dismiss(animated: true)
-        } catch {
-            print("Failed to save tracker: \(error)")
+        if isEditingMode {
+            delegate?.didUpdateTracker(tracker, categoryTitle: selectedCategoryTitle)
+        } else {
+            delegate?.didCreateTracker(tracker, categoryTitle: selectedCategoryTitle)
         }
+        dismiss(animated: true)
     }
     
     func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
@@ -171,19 +212,20 @@ final class NewHabitViewController: UIViewController, UITableViewDataSource, UIT
     
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
         let cell = UITableViewCell(style: .subtitle, reuseIdentifier: "cell")
-        cell.backgroundColor = .systemGray6
+        cell.backgroundColor = colors.secondaryBackgroundColor
         cell.accessoryType = .disclosureIndicator
         cell.selectionStyle = .none
         
         if indexPath.row == 0 {
-            cell.textLabel?.text = "Категория"
+            cell.textLabel?.text = NSLocalizedString("newHabit.category", comment: "")
             cell.detailTextLabel?.text = selectedCategoryTitle
         } else {
-            cell.textLabel?.text = "Расписание"
+            cell.textLabel?.text = NSLocalizedString("newHabit.schedule", comment: "")
             if selectedSchedule.isEmpty {
                 cell.detailTextLabel?.text = ""
             } else {
-                cell.detailTextLabel?.text = "Выбрано дней: \(selectedSchedule.count)"
+                let formatString = NSLocalizedString("newHabit.schedule.selected", comment: "")
+                cell.detailTextLabel?.text = String(format: formatString, selectedSchedule.count)
             }
         }
         return cell
@@ -191,15 +233,13 @@ final class NewHabitViewController: UIViewController, UITableViewDataSource, UIT
     
     func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
         if indexPath.row == 0 {
-            let viewModel = CategoryViewModel(
-                categoryStore: trackerCategoryStore,
-                selectedCategoryTitle: selectedCategoryTitle
-            )
+            let viewModel = CategoryViewModel(selectedCategoryTitle: selectedCategoryTitle)
             let categoriesVC = CategoriesViewController(viewModel: viewModel)
             categoriesVC.delegate = self
             navigationController?.pushViewController(categoriesVC, animated: true)
         } else if indexPath.row == 1 {
             let scheduleVC = ScheduleViewController()
+            scheduleVC.selectedDays = selectedSchedule
             scheduleVC.delegate = self
             navigationController?.pushViewController(scheduleVC, animated: true)
         }
@@ -210,7 +250,7 @@ final class NewHabitViewController: UIViewController, UITableViewDataSource, UIT
     }
     
     func collectionView(_ collectionView: UICollectionView, numberOfItemsInSection section: Int) -> Int {
-        return section == 0 ? emojis.count : colors.count
+        return section == 0 ? emojis.count : trackerColors.count
     }
     
     func collectionView(_ collectionView: UICollectionView, cellForItemAt indexPath: IndexPath) -> UICollectionViewCell {
@@ -231,7 +271,7 @@ final class NewHabitViewController: UIViewController, UITableViewDataSource, UIT
             ) as? ColorCell else {
                 return UICollectionViewCell()
             }
-            let color = colors[indexPath.item]
+            let color = trackerColors[indexPath.item]
             cell.configure(with: color, isSelected: color == selectedColor)
             return cell
         }
@@ -245,7 +285,9 @@ final class NewHabitViewController: UIViewController, UITableViewDataSource, UIT
         ) as? SectionHeaderView else {
             return UICollectionReusableView()
         }
-        header.titleLabel.text = indexPath.section == 0 ? "Emoji" : "Цвет"
+        header.titleLabel.text = indexPath.section == 0
+            ? "Emoji"
+            : NSLocalizedString("newHabit.color", comment: "")
         return header
     }
     
@@ -270,7 +312,7 @@ final class NewHabitViewController: UIViewController, UITableViewDataSource, UIT
         if indexPath.section == 0 {
             selectedEmoji = emojis[indexPath.item]
         } else {
-            selectedColor = colors[indexPath.item]
+            selectedColor = trackerColors[indexPath.item]
         }
         collectionView.reloadSections(IndexSet(integer: indexPath.section))
     }
@@ -319,13 +361,20 @@ final class SectionHeaderView: UICollectionReusableView {
 final class ScheduleViewController: UIViewController, UITableViewDataSource, UITableViewDelegate {
     
     weak var delegate: ScheduleViewControllerDelegate?
+    private let colors = Colors()
     
     let days: [WeekDay] = [
         .monday, .tuesday, .wednesday, .thursday, .friday, .saturday, .sunday
     ]
     
     let dayNames = [
-        "Понедельник", "Вторник", "Среда", "Четверг", "Пятница", "Суббота", "Воскресенье"
+        NSLocalizedString("day.monday", comment: ""),
+        NSLocalizedString("day.tuesday", comment: ""),
+        NSLocalizedString("day.wednesday", comment: ""),
+        NSLocalizedString("day.thursday", comment: ""),
+        NSLocalizedString("day.friday", comment: ""),
+        NSLocalizedString("day.saturday", comment: ""),
+        NSLocalizedString("day.sunday", comment: "")
     ]
     
     var selectedDays: [WeekDay] = []
@@ -334,8 +383,8 @@ final class ScheduleViewController: UIViewController, UITableViewDataSource, UIT
     
     override func viewDidLoad() {
         super.viewDidLoad()
-        view.backgroundColor = .systemBackground
-        title = "Расписание"
+        view.backgroundColor = colors.viewBackgroundColor
+        title = NSLocalizedString("schedule.title", comment: "")
         setupViews()
     }
     
@@ -348,9 +397,9 @@ final class ScheduleViewController: UIViewController, UITableViewDataSource, UIT
         tableView.translatesAutoresizingMaskIntoConstraints = false
         view.addSubview(tableView)
         
-        doneButton.setTitle("Готово", for: .normal)
-        doneButton.setTitleColor(.white, for: .normal)
-        doneButton.backgroundColor = .black
+        doneButton.setTitle(NSLocalizedString("schedule.done", comment: ""), for: .normal)
+        doneButton.setTitleColor(colors.buttonTextColor, for: .normal)
+        doneButton.backgroundColor = colors.buttonBackgroundColor
         doneButton.layer.cornerRadius = 16
         doneButton.addTarget(self, action: #selector(doneTapped), for: .touchUpInside)
         doneButton.translatesAutoresizingMaskIntoConstraints = false
@@ -375,7 +424,7 @@ final class ScheduleViewController: UIViewController, UITableViewDataSource, UIT
     
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
         let cell = UITableViewCell(style: .default, reuseIdentifier: "dayCell")
-        cell.backgroundColor = .systemGray6
+        cell.backgroundColor = colors.secondaryBackgroundColor
         cell.selectionStyle = .none
         cell.textLabel?.text = dayNames[indexPath.row]
         
@@ -393,14 +442,8 @@ final class ScheduleViewController: UIViewController, UITableViewDataSource, UIT
         if sender.isOn {
             selectedDays.append(day)
         } else {
-            var indexToRemove = -1
-            for i in 0..<selectedDays.count {
-                if selectedDays[i] == day {
-                    indexToRemove = i
-                }
-            }
-            if indexToRemove >= 0 {
-                selectedDays.remove(at: indexToRemove)
+            if let index = selectedDays.firstIndex(of: day) {
+                selectedDays.remove(at: index)
             }
         }
     }

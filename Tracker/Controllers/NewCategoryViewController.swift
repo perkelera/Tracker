@@ -1,6 +1,6 @@
 import UIKit
 
-final class NewCategoryViewController: UIViewController,UITextFieldDelegate {
+final class NewCategoryViewController: UIViewController, UITextFieldDelegate {
     
     var onCategoryCreated: ((String) -> Void)?
     
@@ -9,7 +9,7 @@ final class NewCategoryViewController: UIViewController,UITextFieldDelegate {
     
     override func viewDidLoad() {
         super.viewDidLoad()
-        title = "Новая категория"
+        title = NSLocalizedString("newCategory.title", comment: "")
         view.backgroundColor = .systemBackground
         navigationItem.setHidesBackButton(true, animated: false)
         
@@ -19,7 +19,7 @@ final class NewCategoryViewController: UIViewController,UITextFieldDelegate {
     func setupViews() {
         nameTextField.returnKeyType = .done
         nameTextField.delegate = self
-        nameTextField.placeholder = "Введите название категории"
+        nameTextField.placeholder = NSLocalizedString("newCategory.placeholder", comment: "")
         nameTextField.backgroundColor = .systemGray6
         nameTextField.layer.cornerRadius = 16
         nameTextField.font = .systemFont(ofSize: 17, weight: .regular)
@@ -30,7 +30,7 @@ final class NewCategoryViewController: UIViewController,UITextFieldDelegate {
         nameTextField.translatesAutoresizingMaskIntoConstraints = false
         view.addSubview(nameTextField)
         
-        doneButton.setTitle("Готово", for: .normal)
+        doneButton.setTitle(NSLocalizedString("newCategory.done", comment: ""), for: .normal)
         doneButton.setTitleColor(.white, for: .normal)
         doneButton.titleLabel?.font = .systemFont(ofSize: 16, weight: .medium)
         doneButton.backgroundColor = .systemGray4
@@ -52,10 +52,12 @@ final class NewCategoryViewController: UIViewController,UITextFieldDelegate {
             doneButton.heightAnchor.constraint(equalToConstant: 60)
         ])
     }
+    
     func textFieldShouldReturn(_ textField: UITextField) -> Bool {
         textField.resignFirstResponder()
         return true
     }
+    
     @objc func textFieldDidChange() {
         let text = nameTextField.text?.trimmingCharacters(in: .whitespaces) ?? ""
         doneButton.isEnabled = !text.isEmpty
