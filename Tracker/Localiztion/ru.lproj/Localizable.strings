@@ -1,0 +1,59 @@
+/* 
+  Localizable.strings
+  Tracker
+
+  Created by Anton Rachkov on 12.11.2026.
+  
+*/
+"trackers.title" = "Трекеры";
+"trackers.search.placeholder" = "Поиск";
+"trackers.empty.title" = "Что будем отслеживать?";
+"statistics.title" = "Статистика";
+"onboarding.first.title" = "Отслеживайте только\nто, что хотите";
+"onboarding.second.title" = "Даже если это\nне литры воды и йога";
+"onboarding.button.title" = "Вот это технологии!";
+"newHabit.title" = "Новая привычка";
+"newHabit.name.placeholder" = "Введите название трекера";
+"newHabit.category" = "Категория";
+"newHabit.schedule" = "Расписание";
+"newHabit.cancel" = "Отменить";
+"newHabit.create" = "Создать";
+"categories.title" = "Категория";
+"categories.empty.title" = "Привычки и события можно\nобъединить по смыслу";
+"categories.add.button" = "Добавить категорию";
+"newCategory.title" = "Новая категория";
+"newCategory.placeholder" = "Введите название категории";
+"newCategory.done" = "Готово";
+"newHabit.color" = "Цвет";
+"newHabit.schedule.selected" = "Выбрано дней: %d";
+"schedule.title" = "Расписание";
+"schedule.done" = "Готово";
+"day.monday" = "Понедельник";
+"day.tuesday" = "Вторник";
+"day.wednesday" = "Среда";
+"day.thursday" = "Четверг";
+"day.friday" = "Пятница";
+"day.saturday" = "Суббота";
+"day.sunday" = "Воскресенье";
+"newHabit.defaultCategory" = "Важное";
+"trackers.empty.title" = "Что будем отслеживать?";
+"trackers.nothingFound.title" = "Ничего не найдено";
+"statistics.empty.title" = "Анализировать пока нечего";
+"statistics.bestPeriod" = "Лучший период";
+"statistics.idealDays" = "Идеальные дни";
+"statistics.completed" = "Трекеров завершено";
+"statistics.average" = "Среднее значение";
+"editHabit.title" = "Редактирование привычки";
+"editHabit.save" = "Сохранить";
+"contextMenu.edit" = "Редактировать";
+"contextMenu.delete" = "Удалить";
+"deleteAlert.message" = "Уверены что хотите удалить трекер?";
+"deleteAlert.cancel" = "Отменить";
+"trackers.pinnedCategory" = "Закрепленные";
+"contextMenu.pin" = "Закрепить";
+"contextMenu.unpin" = "Открепить";
+"filters.title" = "Фильтры";
+"filters.all" = "Все трекеры";
+"filters.today" = "Трекеры на сегодня";
+"filters.completed" = "Завершенные";
+"filters.uncompleted" = "Не завершенные";

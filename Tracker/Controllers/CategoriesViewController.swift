@@ -8,6 +8,7 @@ final class CategoriesViewController: UIViewController, UITableViewDataSource, U
     
     weak var delegate: CategoriesViewControllerDelegate?
     private let viewModel: CategoryViewModel
+    private let colors = Colors()
     
     let tableView = UITableView()
     let placeholderImage = UIImageView()
@@ -25,8 +26,8 @@ final class CategoriesViewController: UIViewController, UITableViewDataSource, U
     
     override func viewDidLoad() {
         super.viewDidLoad()
-        title = "Категория"
-        view.backgroundColor = .systemBackground
+        title = NSLocalizedString("categories.title", comment: "")
+        view.backgroundColor = colors.viewBackgroundColor
         navigationItem.setHidesBackButton(true, animated: false)
         
         setupViews()
@@ -48,18 +49,18 @@ final class CategoriesViewController: UIViewController, UITableViewDataSource, U
         placeholderImage.translatesAutoresizingMaskIntoConstraints = false
         view.addSubview(placeholderImage)
         
-        placeholderText.text = "Привычки и события можно\nобъединить по смыслу"
+        placeholderText.text = NSLocalizedString("categories.empty.title", comment: "")
         placeholderText.textAlignment = .center
         placeholderText.font = .systemFont(ofSize: 12, weight: .medium)
-        placeholderText.textColor = .label
+        placeholderText.textColor = colors.primaryTextColor
         placeholderText.numberOfLines = 2
         placeholderText.translatesAutoresizingMaskIntoConstraints = false
         view.addSubview(placeholderText)
         
-        addCategoryButton.setTitle("Добавить категорию", for: .normal)
-        addCategoryButton.setTitleColor(.white, for: .normal)
+        addCategoryButton.setTitle(NSLocalizedString("categories.add.button", comment: ""), for: .normal)
+        addCategoryButton.setTitleColor(colors.buttonTextColor, for: .normal)
         addCategoryButton.titleLabel?.font = .systemFont(ofSize: 16, weight: .medium)
-        addCategoryButton.backgroundColor = .black
+        addCategoryButton.backgroundColor = colors.buttonBackgroundColor
         addCategoryButton.layer.cornerRadius = 16
         addCategoryButton.addTarget(self, action: #selector(addCategoryTapped), for: .touchUpInside)
         addCategoryButton.translatesAutoresizingMaskIntoConstraints = false

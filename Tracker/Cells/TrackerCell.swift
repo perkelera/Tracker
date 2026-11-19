@@ -9,11 +9,13 @@ import UIKit
 
 final class TrackerCell: UICollectionViewCell {
     static let identifier = "TrackerCell"
-    
+    private let colors = Colors()
     var doneButtonAction: (() -> Void)?
+    
     let cardView = UIView()
     let emojiBackgroundView = UIView()
     let emojiLabel = UILabel()
+    let pinImageView = UIImageView()
     let titleLabel = UILabel()
     let daysLabel = UILabel()
     let doneButton = UIButton(type: .system)
@@ -22,11 +24,10 @@ final class TrackerCell: UICollectionViewCell {
         super.init(frame: frame)
         
         cardView.layer.cornerRadius = 16
+        cardView.layer.masksToBounds = true
         cardView.translatesAutoresizingMaskIntoConstraints = false
         contentView.addSubview(cardView)
-        emojiLabel.font = .systemFont(ofSize: 24)
-        emojiLabel.translatesAutoresizingMaskIntoConstraints = false
-        cardView.addSubview(emojiLabel)
+        
         emojiBackgroundView.backgroundColor = UIColor.white.withAlphaComponent(0.3)
         emojiBackgroundView.layer.cornerRadius = 12
         emojiBackgroundView.layer.masksToBounds = true
@@ -38,6 +39,13 @@ final class TrackerCell: UICollectionViewCell {
         emojiLabel.translatesAutoresizingMaskIntoConstraints = false
         emojiBackgroundView.addSubview(emojiLabel)
         
+        pinImageView.image = UIImage(systemName: "pin.fill")
+        pinImageView.tintColor = .white
+        pinImageView.contentMode = .scaleAspectFit
+        pinImageView.isHidden = true
+        pinImageView.translatesAutoresizingMaskIntoConstraints = false
+        cardView.addSubview(pinImageView)
+        
         titleLabel.textColor = .white
         titleLabel.font = .systemFont(ofSize: 12, weight: .medium)
         titleLabel.numberOfLines = 2
@@ -45,11 +53,12 @@ final class TrackerCell: UICollectionViewCell {
         cardView.addSubview(titleLabel)
         
         daysLabel.font = .systemFont(ofSize: 12, weight: .medium)
+        daysLabel.textColor = colors.primaryTextColor
         daysLabel.translatesAutoresizingMaskIntoConstraints = false
         contentView.addSubview(daysLabel)
         
         doneButton.layer.cornerRadius = 17
-        doneButton.tintColor = .white
+        doneButton.tintColor = colors.viewBackgroundColor
         doneButton.addTarget(self, action: #selector(buttonTapped), for: .touchUpInside)
         doneButton.translatesAutoresizingMaskIntoConstraints = false
         contentView.addSubview(doneButton)
@@ -67,8 +76,11 @@ final class TrackerCell: UICollectionViewCell {
             
             emojiLabel.centerXAnchor.constraint(equalTo: emojiBackgroundView.centerXAnchor),
             emojiLabel.centerYAnchor.constraint(equalTo: emojiBackgroundView.centerYAnchor),
-            emojiLabel.topAnchor.constraint(equalTo: cardView.topAnchor, constant: 12),
-            emojiLabel.leadingAnchor.constraint(equalTo: cardView.leadingAnchor, constant: 12),
+            
+            pinImageView.topAnchor.constraint(equalTo: cardView.topAnchor, constant: 18),
+            pinImageView.trailingAnchor.constraint(equalTo: cardView.trailingAnchor, constant: -12),
+            pinImageView.widthAnchor.constraint(equalToConstant: 12),
+            pinImageView.heightAnchor.constraint(equalToConstant: 12),
             
             titleLabel.leadingAnchor.constraint(equalTo: cardView.leadingAnchor, constant: 12),
             titleLabel.trailingAnchor.constraint(equalTo: cardView.trailingAnchor, constant: -12),

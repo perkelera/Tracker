@@ -12,7 +12,7 @@ class OnboardingViewController: UIPageViewController, UIPageViewControllerDataSo
         firstVC.view.addSubview(firstBackground)
         
         let firstLabel = UILabel()
-        firstLabel.text = "Отслеживайте только\nто, что хотите"
+        firstLabel.text = NSLocalizedString("onboarding.first.title", comment: "");
         firstLabel.font = .systemFont(ofSize: 32, weight: .bold)
         firstLabel.textColor = .black
         firstLabel.textAlignment = .center
@@ -40,7 +40,7 @@ class OnboardingViewController: UIPageViewController, UIPageViewControllerDataSo
         secondVC.view.addSubview(secondBackground)
         
         let secondLabel = UILabel()
-        secondLabel.text = "Даже если это\nне литры воды и йога"
+        secondLabel.text = NSLocalizedString("onboarding.second.title", comment: "");
         secondLabel.font = .systemFont(ofSize: 32, weight: .bold)
         secondLabel.textColor = .black
         secondLabel.textAlignment = .center
@@ -75,7 +75,7 @@ class OnboardingViewController: UIPageViewController, UIPageViewControllerDataSo
     
     lazy var confirmButton: UIButton = {
         let button = UIButton(type: .system)
-        button.setTitle("Вот это технологии!", for: .normal)
+        button.setTitle(NSLocalizedString("onboarding.button.title", comment: ""), for: .normal);
         button.setTitleColor(.white, for: .normal)
         button.titleLabel?.font = .systemFont(ofSize: 16, weight: .medium)
         button.backgroundColor = .black

@@ -94,6 +94,39 @@ final class TrackerCategoryStore: NSObject {
         
         try context.save()
     }
+    func updateTracker(_ tracker: Tracker, inCategoryWithTitle title: String) throws {
+        let trackerRequest = TrackerCoreData.fetchRequest()
+        trackerRequest.predicate = NSPredicate(format: "id == %@", tracker.id as CVarArg)
+        guard let trackerCoreData = try context.fetch(trackerRequest).first else { return }
+        
+        let categoryRequest = TrackerCategoryCoreData.fetchRequest()
+        categoryRequest.predicate = NSPredicate(format: "%K == %@", #keyPath(TrackerCategoryCoreData.title), title)
+        let existingCategories = try context.fetch(categoryRequest)
+        
+        let categoryCoreData: TrackerCategoryCoreData
+        if let found = existingCategories.first {
+            categoryCoreData = found
+        } else {
+            categoryCoreData = TrackerCategoryCoreData(context: context)
+            categoryCoreData.title = title
+        }
+        
+        let trackerStore = TrackerStore(context: context)
+        trackerStore.updateExistingTracker(trackerCoreData, with: tracker)
+        trackerCoreData.category = categoryCoreData
+        
+        try context.save()
+    }
+    
+    func deleteTracker(withId id: UUID) throws {
+        let request = TrackerCoreData.fetchRequest()
+        request.predicate = NSPredicate(format: "id == %@", id as CVarArg)
+        let trackers = try context.fetch(request)
+        for tracker in trackers {
+            context.delete(tracker)
+        }
+        try context.save()
+    }
 }
 
 extension TrackerCategoryStore: NSFetchedResultsControllerDelegate {

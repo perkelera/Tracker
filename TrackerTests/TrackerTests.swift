@@ -5,15 +5,25 @@
 //  Created by Anton Rachkov on 28.09.2026.
 //
 
-import Testing
+import XCTest
+import SnapshotTesting
 @testable import Tracker
 
-struct TrackerTests {
+final class TrackerTests: XCTestCase {
 
-    @Test func example() async throws {
-        // Write your test here and use APIs like `#expect(...)` to check expected conditions.
-        // Swift Testing Documentation
-        // https://developer.apple.com/documentation/testing
+    func testTrackersViewControllerLight() {
+        let vc = TrackersViewController()
+        assertSnapshot(
+            of: vc,
+            as: .image(traits: .init(userInterfaceStyle: .light))
+        )
     }
 
+    func testTrackersViewControllerDark() {
+        let vc = TrackersViewController()
+        assertSnapshot(
+            of: vc,
+            as: .image(traits: .init(userInterfaceStyle: .dark))
+        )
+    }
 }
